@@ -20,7 +20,7 @@
 ##### 使用 `Net.core 3.1` 資料庫使用`Sqlite` 資料CRUD使用`Entity Framework` `Linq`來實作
 * * *
 ###  === Ticket System Task3 ===
-###### 目錄底下 datamodel.jpg
+###### 目錄底下 datamodel.png
 * * *
 ###  === Ticket System Task4 ===
 ###### 已實作於ApiController下

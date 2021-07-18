@@ -1,0 +1,51 @@
+﻿@inject TicketSystemDemo.Models.TicketSystemContext _context
+@{
+    ViewData["Title"] = "Ticket System";
+
+    var TicketData = (from a in _context.Ticket
+                      join b in _context.TicketType on a.TicketTypeKey equals b.TicketTypeKey
+                      select new TicketSystemDemo.Models.ViewModels.ViewTicket
+                      {
+                          TicketKey = a.TicketKey,
+                          TicketName = a.TicketName,
+                          TicketTypeName = b.TicketTypeName,
+                          Summary = a.Summary,
+                          Severity = a.Severity,
+                          Description = a.Description,
+                          IsResolve = a.IsResolve,
+                          Priority = a.Priority,
+                          ReadOnly = b.ReadOnly,
+                      }).ToList();
+
+}
+
+@foreach (var item in TicketData)
+{
+    <div class="jumbotron">
+
+        Resolve : @Html.Raw(item.IsResolve)
+        <h1>@Html.Raw(item.TicketName)</h1>
+        <p class="lead">TicketType:@Html.Raw(item.TicketTypeName)</p>
+        <p>Priority: @Html.Raw(item.Priority)</p>
+        <p>Severity: @Html.Raw(item.Severity)</p>
+        <hr class="my-4">
+        <p class="lead">Summary: @Html.Raw(item.Summary)</p>
+        <hr class="my-4">
+        <p class="lead">Description: @Html.Raw(item.Description)</p>
+        @if (item.ReadOnly)
+        {
+            <button type="button" style="display:none;" class="btn btn-secondary" id="ResolveButtonReadOnly" onclick="changeResolve('@item.TicketKey')">Resolve</button>
+            <a class="btn btn-primary" style="display:none;" id="UpdateButtonReadOnly" href="/Home/Ticket?TicketKey=@item.TicketKey" role="button">Update</a>
+        }
+        else
+        {
+            @if (item.IsResolve == false)
+            {
+                <button type="button" style="display:none;" class="btn btn-secondary" id="ResolveButton" onclick="changeResolve('@item.TicketKey')">Resolve</button>
+            }
+            <a class="btn btn-primary" id="UpdateButton" href="/Home/Ticket?TicketKey=@item.TicketKey" role="button">Update</a>
+        }
+
+    </div>
+}
+

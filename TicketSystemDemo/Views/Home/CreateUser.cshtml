@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "User";
+
+
+}
+
+<h2>Editor User</h2>
+<br />
+
+
+<form id="UserForm" name="UserForm">
+    <div class="row">
+        <div class="col">
+            <label for="UserName">UserName</label>
+            <input type="text" class="form-control" id="UserName" name="UserName" placeholder="Enter UserName" required>
+        </div>
+        <div class="col">
+            <label for="UserType">UserType</label>
+            <select class="form-control" id="UserTypeKey" name="UserTypeKey"></select>
+        </div>
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+
+<script>
+
+    if (JSON.parse(localStorage.getItem("LoginData"))[0] !== "cbea8e8f-8b9f-48b5-a7d3-40c9be502fd8") {
+        alert("Only Admin");
+        location.href = "/";
+    }
+    setUserType();
+
+
+    $("#UserForm").submit(function (e) {
+        let form = $(this);
+        $.ajax({
+            type: "POST",
+            url: "/api/saveUser",
+            data: form.serialize(),
+            success: function (data) {
+                if (data.result) {
+                    alert(data.msg);
+                    location.href = "/";
+                } else {
+                    alert(data.msg);
+                }
+            }
+        });
+
+        e.preventDefault();
+    });
+    function setUserType() {
+        $.ajax({
+            url: "/api/getUserType",
+            type: "get",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            json: 'callback',
+            success: function (json) {
+                $.each(json, function (index, item) {
+                    let Value = json[index].UserTypeKey;
+                    let Name = json[index].UserTypeName;
+                    $('#UserTypeKey').append("<option value='" + Value + "'>" + Name + "</option>")
+                });
+            },
+            error: function () {
+                alert("error");
+                location.reload();
+            }
+        });
+    }
+</script>

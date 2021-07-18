@@ -1,0 +1,200 @@
+﻿@{
+    ViewData["Title"] = "Editor";
+    var data = ViewData["data"] as Ticket;
+    if (data == null)
+    {
+        data = new Ticket();
+        data.TicketKey = Guid.Empty;
+    }
+}
+
+<h2>Editor Ticket</h2>
+<br />
+
+
+<form id="TicketForm" name="TicketForm">
+    <input id="TicketKey" name="TicketKey" value="@Html.Raw(data.TicketKey)" type="hidden" />
+    <div class="form-group">
+        <label for="TicketName">TicketName</label>
+        <input type="text" class="form-control" id="TicketName" name="TicketName" placeholder="Enter TicketName" value="@Html.Raw(data.TicketName)">
+    </div>
+    <div class="form-group">
+        <label for="TicketTypeKey">TicketType</label>
+        <select class="form-control" id="TicketTypeKey" name="TicketTypeKey"></select>
+    </div>
+    @* Phase II start *@
+    <div class="row">
+        <div class="col">
+            <label for="Priority">Priority</label>
+            <select class="form-control" id="Priority" name="Priority">
+            </select>
+        </div>
+        <div class="col">
+            <label for="Severity ">Severity</label>
+            <select class="form-control" id="Severity" name="Severity">
+            </select>
+        </div>
+    </div>
+    @* Phase II end *@
+    <div class="form-group">
+        <label for="Summary">Summary</label>
+        <input type="text" class="form-control" id="Summary" name="Summary" placeholder="Enter Summary" value="@Html.Raw(data.Summary)">
+    </div>
+    <div class="form-group">
+        <label for="Description">Description</label>
+        <textarea class="form-control" id="Description" name="Description" rows="3" placeholder="Enter Description">@Html.Raw(data.Description)</textarea>
+    </div>
+    <div class="form-group">
+        <label for="Priority">Resolved</label>
+        <select class="form-control" id="IsResolve" name="IsResolve">
+            @if (data.IsResolve)
+            {
+                <option value="true">true</option>
+                <option value="false">false</option>
+            }
+            else
+            {
+                <option value="false">false</option>
+                <option value="true">true</option>
+            }
+
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button> 
+    @if (data.TicketKey != Guid.Empty)
+    {
+        <button type="button" class="btn btn-danger" onclick="delTicket()">Delete</button>
+    }
+</form>
+
+
+<script>
+    let TicketTypeKey= "@data.TicketTypeKey";
+    let Priority = "@data.Priority";
+    let Severity = "@data.Severity";
+
+    setTicketType();
+    setPriority();
+    setSeverity();
+
+    $("#TicketForm").submit(function (e) {
+        let form = $(this);
+        $.ajax({
+            type: "POST",
+            url: "/api/saveTicket",
+            data: form.serialize(),
+            success: function (data) {
+                if (data.result) {
+                    alert(data.msg);
+                    location.href = "/";
+                } else {
+                    alert(data.msg);
+                }
+            }
+        });
+
+        e.preventDefault();
+    });
+    function delTicket() {
+        $.ajax({
+            url: "/api/delTicket",
+            type: "get",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            json: 'callback',
+            data: { TicketKey: $("#TicketKey").val() },
+            success: function (data) {
+                if (data.result) {
+                    alert(data.msg);
+                    location.href = "/";
+                } else {
+                    alert(data.msg);
+                }
+            },
+            error: function () {
+                alert("error");
+                location.reload();
+            }
+        });
+    }
+
+
+    function setTicketType() {
+        if (JSON.parse(localStorage.getItem("LoginData"))[0] === "8d5e5e67-6c1f-4379-bba2-ee0436253d85") {
+            alert("RD type can't create.");
+            location.href = "/";
+        }
+        $.ajax({
+            url: "/api/getTicketType",
+            type: "get",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            json: 'callback',
+            data: { UserTypeKey: JSON.parse(localStorage.getItem("LoginData"))[0] },
+            success: function (json) {
+                $.each(json, function (index, item) {
+                    let Value = json[index].TicketTypeKey;
+                    let Name = json[index].TicketTypeName;
+                    if (Value === TicketTypeKey) {
+                        $('#TicketTypeKey').append("<option selected value='" + Value + "'>" + Name + "</option>")
+                    } else {
+                        $('#TicketTypeKey').append("<option value='" + Value + "'>" + Name + "</option>")
+                    }
+
+                });
+            },
+            error: function () {
+                alert("error");
+                location.reload();
+            }
+        });
+    }
+    function setPriority() {
+        $.ajax({
+            url: "/api/getPriority",
+            type: "get",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            json: 'callback',
+            success: function (json) {
+                $.each(json, function (index, item) {
+                    let Value = json[index].Value;
+                    let Name = json[index].Name;
+                    if (Value === Priority) {
+                        $('#Priority').append("<option selected value='" + Value + "'>" + Name + "</option>")
+                    } else {
+                        $('#Priority').append("<option value='" + Value + "'>" + Name + "</option>")
+                    }
+                });
+            },
+            error: function () {
+                alert("error");
+                location.reload();
+            }
+        });
+    }
+    function setSeverity() {
+        $.ajax({
+            url: "/api/getSeverity",
+            type: "get",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            json: 'callback',
+            success: function (json) {
+                $.each(json, function (index, item) {
+                    let Value = json[index].Value;
+                    let Name = json[index].Name;
+                    if (Value === Severity) {
+                        $('#Severity').append("<option selected value='" + Value + "'>" + Name + "</option>")
+                    } else {
+                        $('#Severity').append("<option value='" + Value + "'>" + Name + "</option>")
+                    }
+                });
+            },
+            error: function () {
+                alert("error");
+                location.reload();
+            }
+        });
+    }
+</script>
